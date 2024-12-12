@@ -7,7 +7,7 @@ pipeline {
                 script {
                     echo 'Checking pre-requisites...'
                     // Add commands to check dependencies, tools, or configurations
-                    sh 'echo "Pre-requisite check complete"'
+                    sh 'echo "Pre-requisite check completed"'
                 }
             }
         }
