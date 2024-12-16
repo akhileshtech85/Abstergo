@@ -2,30 +2,30 @@ pipeline {
     agent any
 
     stages {
-        stage('Pre-requisite') {
+        stage('Job-1') {
             steps {
                 script {
-                    echo 'Checking pre-requisites...'
+                    echo 'Install and configure puppet agent on slave node.'
                     // Add commands to check dependencies, tools, or configurations
                     sh 'echo "Pre-requisite check completed"'
                 }
             }
         }
 
-        stage('Build') {
+        stage('Job-2') {
             steps {
                 script {
-                    echo 'Starting build...'
+                    echo 'Push Ansible configuration on test-server to install docker.'
                     // Replace with actual build commands
                     
                 }
             }
         }
 
-        stage('Test') {
+        stage('Job-3') {
             steps {
                 script {
-                    echo 'Running tests...'
+                    echo 'Pull repo, Build docker  and Deploy Container.'
                     // Replace with actual test commands
                     
                 }
@@ -42,7 +42,7 @@ pipeline {
             echo 'Build and tests completed successfully.'
         }
         failure {
-            echo 'Build or tests failed.'
+            echo 'Delete the running container on Test Server.'
         }
     }
 }
