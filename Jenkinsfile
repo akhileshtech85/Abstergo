@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+            REGISTRY = 'your-docker-registry-url'
+            IMAGE_NAME = 'your-image-name'
+            DOCKER_CREDENTIALS = 'docker-credentials-id' // Jenkins credentials ID for Docker login
+        }
+
     stages {
         stage('Job-1') {
             steps {
@@ -26,9 +32,8 @@ pipeline {
             steps {
                 script {
                     echo 'Pull repo, Build docker and Deploy Container.'
-                    docker build -t website .
-                    docker rm -f website-test-server //Remove previous instance if running. 
-                    docker run -d --name website-test-server  website
+                    checkout scm
+                    docker.build("${IMAGE_NAME}")                    
                     
                 }
             }
