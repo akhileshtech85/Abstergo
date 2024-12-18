@@ -25,10 +25,10 @@ pipeline {
         stage('Job-3') {
             steps {
                 script {
-                    echo 'Pull repo, Build docker  and Deploy Container.'
+                    echo 'Pull repo, Build docker and Deploy Container.'
                     docker build -t website .
                     docker rm -f website-test-server //Remove previous instance if running. 
-                    docker run -d -n website-test-server -p 8088:80 website
+                    docker run -d --name website-test-server -p 8088:80 website
                     
                 }
             }
