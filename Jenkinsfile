@@ -26,7 +26,9 @@ pipeline {
             steps {
                 script {
                     echo 'Pull repo, Build docker  and Deploy Container.'
-                    // Replace with actual test commands
+                    docker build -t website:latest .
+                    docker rm -f website-test-server //Remove previous instance if running. 
+                    docker run -d --name website-test-server -p 8080:80 website:latest
                     
                 }
             }
