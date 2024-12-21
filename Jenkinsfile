@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent docker
 
     environment {
         GIT_REPO = 'https://github.com/edureka-devops/projCert.git'
