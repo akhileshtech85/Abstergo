@@ -4,7 +4,7 @@ pipeline {
     }
 
     environment {
-        GIT_REPO = 'https://github.com/edureka-devops/projCert.git'
+        GIT_REPO = 'https://github.com/fly2martix/projCert.git'
         DOCKER_IMAGE = 'devopsedu/webapp'
         SLAVE_NODE = 'test-server'
     }
