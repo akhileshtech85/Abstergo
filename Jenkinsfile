@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout the code from the Git repository
-                git branch: 'master', url: "${GIT_REPO}"
+                echo "git branch: 'master', url: ${GIT_REPO}"
             }
         }
 
