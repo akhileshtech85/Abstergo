@@ -2,54 +2,85 @@ pipeline {
     agent any
 
     environment {
-            REGISTRY = 'your-docker-registry-url'
-            IMAGE_NAME = 'your-image-name'
-            DOCKER_CREDENTIALS = 'docker-credentials-id' // Jenkins credentials ID for Docker login
-        }
+        GIT_REPO = 'https://github.com/edureka-devops/projCert.git'
+        DOCKER_IMAGE = 'devopsedu/webapp'
+        SLAVE_NODE = 'test-server'
+    }
 
     stages {
-        stage('Job-1') {
+        stage('Checkout Code') {
             steps {
+                // Checkout the code from the Git repository
+                git branch: 'master', url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Provision Test Server') {
+            steps {
+                // Provision a new test server using Ansible
                 script {
-                    echo 'Install and configure puppet agent on slave node.'
-                    // Add commands to check dependencies, tools, or configurations
-                    sh 'echo "Pre-requisite check completed"'
+                    sh 'ansible-playbook -i inventory/test_server provision_test_server.yml'
                 }
             }
         }
 
-        stage('Job-2') {
+        stage('Install Docker on Test Server') {
             steps {
+                // Use Ansible to install Docker on the test server
                 script {
-                    echo 'Push Ansible configuration on test-server to install docker.'
-                    // Replace with actual build commands
-                    
+                    sh 'ansible-playbook -i inventory/test_server install_docker.yml'
                 }
             }
         }
 
-        stage('Job-3') {
+        stage('Build Docker Image') {
             steps {
+                // Build the Docker image with the PHP application
                 script {
-                    echo 'Pull repo, Build docker and Deploy Container.'
-                    checkout scm
-                    docker.build("${IMAGE_NAME}")                    
-                    
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                }
+            }
+        }
+
+        stage('Deploy to Test Server') {
+            steps {
+                // Deploy the Docker container to the test server
+                script {
+                    sh "docker run -d --name php_app ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Run tests on the deployed application
+                script {
+                    // Add your testing commands here
+                    sh 'curl http://test-server:port/health'
+                }
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                // If tests pass, deploy to production
+                script {
+                    sh "docker run -d --name php_app_prod ${DOCKER_IMAGE}"
                 }
             }
         }
     }
 
     post {
-        always {
-            echo 'Cleaning up workspace...'
-            deleteDir() // Clean up workspace after the build
+        failure {
+            // Clean up if the build fails
+            script {
+                sh "docker rm -f php_app || true"
+            }
         }
         success {
-            echo 'Build and tests completed successfully.'
-        }
-        failure {
-            echo 'Delete the running container on Test Server.'
+            // Notify on success
+            echo 'Deployment to production was successful!'
         }
     }
 }
