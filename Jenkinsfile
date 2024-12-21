@@ -19,7 +19,7 @@ pipeline {
             steps {
                 // Provision a new test server using Ansible
                 script {
-                    sh 'ansible-playbook -i inventory/test_server provision_test_server.yml'
+                    echo 'ansible-playbook -i inventory/test_server provision_test_server.yml'
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 // Use Ansible to install Docker on the test server
                 script {
-                    sh 'ansible-playbook -i inventory/test_server install_docker.yml'
+                    echo 'ansible-playbook -i inventory/test_server install_docker.yml'
                 }
             }
         }
