@@ -19,7 +19,7 @@ pipeline {
 
         stage('Provision Test Server') {
             steps {
-                // Provision a new test server using Ansible
+                // To implement ansible part 
                 script {
                     echo 'ansible-playbook -i inventory/test_server provision_test_server.yml'
                 }
