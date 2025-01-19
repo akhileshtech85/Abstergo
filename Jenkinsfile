@@ -1,88 +1,46 @@
 pipeline {
-    agent {
-        label 'docker'
-    }
-
-    environment {
-        GIT_REPO = 'https://github.com/fly2martix/projCert.git'
-        DOCKER_IMAGE = 'devopsedu/webapp'
-        SLAVE_NODE = 'test-server'
-    }
+    agent any
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                // Checkout the code from the Git repository
-                echo "git branch: 'master', url: ${GIT_REPO}"
+                git 'https://github.com/your-org/your-repo.git'
             }
         }
-
-        stage('Provision Test Server') {
-            steps {
-                // To implement ansible part 
-                script {
-                    echo 'ansible-playbook -i inventory/test_server provision_test_server.yml'
-                }
-            }
-        }
-
-        stage('Install Docker on Test Server') {
-            steps {
-                // Use Ansible to install Docker on the test server
-                script {
-                    echo 'ansible-playbook -i inventory/test_server install_docker.yml'
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                // Build the Docker image with the PHP application
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    // Build the Docker image
+                    def app = docker.build("your-dockerhub-username/your-app:${env.BUILD_ID}")
                 }
             }
         }
-
-        stage('Deploy to Test Server') {
+        stage('Push Docker Image') {
             steps {
-                // Deploy the Docker container to the test server
                 script {
-                    sh "docker run -d --name php_app ${DOCKER_IMAGE}"
+                    // Login to Docker Hub
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
+                        app.push()
+                    }
                 }
             }
         }
-
-        stage('Run Tests') {
+        stage('Deploy to Kubernetes') {
             steps {
-                // Run tests on the deployed application
                 script {
-                    // Add your testing commands here
-                    sh 'curl http://test-server:port/health'
-                }
-            }
-        }
-
-        stage('Deploy to Production') {
-            steps {
-                // If tests pass, deploy to production
-                script {
-                    sh "docker run -d --name php_app_prod ${DOCKER_IMAGE}"
+                    // Deploy the Docker image to Kubernetes
+                    sh 'kubectl set image deployment/your-deployment your-container=${DOCKER_IMAGE}:${env.BUILD_ID}'
                 }
             }
         }
     }
 
     post {
-        failure {
-            // Clean up if the build fails
-            script {
-                sh "docker rm -f php_app || true"
-            }
-        }
         success {
-            // Notify on success
-            echo 'Deployment to production was successful!'
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
         }
     }
 }
